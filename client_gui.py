@@ -43,11 +43,13 @@ def connect(window, client, name):
     scrollbar = tk.Scrollbar(client_window)
     scrollbar.place(x=565, y=70, height=325)
     scrollbar.config(command=text_box.yview)
+    # functions to activate on each message
     client.funcs.append(lambda message: update_chat(text_box, message))
     client_window.mainloop()
 
 
 def update_chat(text_box, msg):
+    # update the text box according to received message
     text_box.config(state="normal")
     msg = msg.split("<")
     for m in msg:

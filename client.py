@@ -80,6 +80,7 @@ class Client:
             # Receive the message from the server
             message = self.socket.recv(1024).decode()
             print(message)
+            # activate the functions on each message
             for func in self.funcs:
                 func(message)
             if message == '<disconnected>':
