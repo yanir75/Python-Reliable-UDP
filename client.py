@@ -12,7 +12,6 @@ class Client:
         self.socket = socket(AF_INET, SOCK_STREAM)
         self.funcs = []
 
-
     def connect(self, name, host='127.0.0.1', port=50002):
         """
         Connect to the server
@@ -37,7 +36,6 @@ class Client:
         Disconnect from the server
         """
         self.socket.send(f'<disconnect>'.encode())
-
 
     def set_msg(self, message, name='all'):
         """
@@ -70,7 +68,6 @@ class Client:
         To be continued
         """
         return False
-
 
     def get_msg(self):
         """

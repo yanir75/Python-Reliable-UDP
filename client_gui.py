@@ -1,12 +1,11 @@
 import tkinter as tk
-from threading import Thread
 
 from client import Client
 
 
-def connect(window, client, name):
+def connect(to_close_window, client, name):
     client.connect(name)
-    window.destroy()
+    to_close_window.destroy()
     # create a window
     client_window = tk.Tk()
     client_window.title("Client")
@@ -62,9 +61,9 @@ def update_chat(text_box, msg):
     text_box.see(tk.END)
 
 
-def disconnect(window, client):
+def disconnect(close_window, client):
     client.disconnect()
-    window.destroy()
+    close_window.destroy()
 
 
 cl = Client()
