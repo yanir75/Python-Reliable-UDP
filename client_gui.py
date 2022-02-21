@@ -35,6 +35,7 @@ def connect(to_close_window, client, name):
     send_button = tk.Button(client_window, text="Send", command=lambda: client.set_msg(msg.get(), name.get()), width=8)
     send_button.place(x=530, y=493, height=32)
     # download file button to download file from server
+    tk.Label(client_window, text="Filename").place(x=7, y=420)
     download = tk.Entry(client_window, width=80)
     download.place(x=10, y=440, height=30)
     download_button = tk.Button(client_window, text="Download", command=lambda: client.download(download.get()),width=12)
