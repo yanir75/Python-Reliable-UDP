@@ -1,3 +1,4 @@
+import os
 from socket import *
 from threading import *
 
@@ -44,22 +45,35 @@ class Server:
                 print(message)
                 if message == "<disconnect>":
                     self.send_client(sock, "<disconnected>")
-                    raise Exception
-                if message == "<get_users>":
-                    msg = f'<users_lst><{len(self.clients)}>'
+                    raise Exception("A client has disconnected")
+                elif message == "<get_users>":
+                    msg = f'<---users_lst---><{len(self.clients)}>'
                     for client in self.clients.values():
                         msg += f'<{client}>'
-                    msg += '<end>'
+                    msg += '<---end--->'
                     self.send_client(sock, msg)
-                if message.startswith("<set_msg>"):
+                elif message.startswith("<set_msg>"):
                     mess = message.split('<')
                     to = mess[2][:-1]
                     msg = mess[3][:-1]
                     for client in self.clients.keys():
                         if self.clients[client] == to:
                             self.send_client(client, f'<{name}:{msg}>')
-                if message.startswith("<set_msg_all>"):
+                elif message.startswith("<set_msg_all>"):
                     self.send_message_to_all(f'<{name}:{message[14:-1]}>')
+                elif message == "<get_list_file>":
+                    file_list = os.listdir('./files')
+                    msg = f'<---file_lst---><{len(file_list)}>'
+                    for file in file_list:
+                        msg += f'<{file}>'
+                    msg += '<---end--->'
+                    self.send_client(sock, msg)
+                elif message.startswith("<download>"):
+                    file_name = message[11:-1]
+                    if not os.path.exists('./files/' + file_name):
+                        self.send_client(sock, "<file_not_found>")
+
+
             except Exception as e:
                 print(e)
                 self.clients.pop(sock)

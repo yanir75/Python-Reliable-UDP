@@ -19,7 +19,7 @@ def connect(to_close_window, client, name):
                                  width=42)
     get_users_button.place(x=0, y=0)
     # get files button from server
-    get_files_button = tk.Button(client_window, text="Get Files", command=lambda: client.get_files(), height=2,
+    get_files_button = tk.Button(client_window, text="Get Files", command=lambda: client.get_list_file(), height=2,
                                  width=42)
     get_files_button.place(x=300, y=0)
     # two input boxes and button sending information to server
