@@ -57,9 +57,9 @@ class Server:
                     msg = mess[3][:-1]
                     for client in self.clients.keys():
                         if self.clients[client] == to:
-                            self.send_client(client, msg)
+                            self.send_client(client, f'<{name}:{msg}>')
                 if message.startswith("<set_msg_all>"):
-                    self.send_message_to_all(message[14:-1])
+                    self.send_message_to_all(f'<{name}:{message[14:-1]}>')
             except Exception as e:
                 print(e)
                 self.clients.pop(sock)
