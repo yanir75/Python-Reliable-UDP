@@ -22,6 +22,8 @@ def connect(to_close_window, client, name):
     get_files_button = tk.Button(client_window, text="Get Files", command=lambda: client.get_list_file(), height=2,
                                  width=42)
     get_files_button.place(x=300, y=0)
+
+
     # two input boxes and button sending information to server
     # add two labels above the input boxes
     tk.Label(client_window, text="To (Type all)").place(x=5, y=470)
@@ -32,6 +34,11 @@ def connect(to_close_window, client, name):
     msg.place(x=100, y=495, height=30)
     send_button = tk.Button(client_window, text="Send", command=lambda: client.set_msg(msg.get(), name.get()), width=8)
     send_button.place(x=530, y=493, height=32)
+    # download file button to download file from server
+    download = tk.Entry(client_window, width=80)
+    download.place(x=10, y=440, height=30)
+    download_button = tk.Button(client_window, text="Download", command=lambda: client.download(download.get()),width=12)
+    download_button.place(x=500, y=438, height=32)
 
     # label for displaying messages
     tk.Label(client_window, text="Messages").place(x=0, y=50)
