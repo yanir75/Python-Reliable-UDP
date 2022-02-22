@@ -10,12 +10,25 @@ class Server:
         """
         # AF_inet = IPv4 address family and SOCK_STREAM = TCP
         self.socket = socket(AF_INET, SOCK_STREAM)
+        self.stream1 = socket(AF_INET, SOCK_DGRAM)
+        self.stream2 = socket(AF_INET, SOCK_DGRAM)
+        self.available = True
+
+        self.stream1_download = {}
+        self.stream2_download = {}
+
+        self.stream1_send = False
+        self.stream2_send = False
+
+        self.waiting_for_proceed = []
+        self.download_queue = {}
         # bind the socket to the port number and host address (localhost) and listen for connections (5) at max,
         # at a time
         self.socket.bind(('127.0.0.1', 50002))
         self.socket.listen(5)
         # create a list of clients to store the clients connected to the server
         self.clients = {}
+        self.window_size = 1
 
     def run(self):
         """
@@ -75,6 +88,7 @@ class Server:
 
 
 
+
             except Exception as e:
                 print(e)
                 self.clients.pop(sock)
@@ -91,3 +105,70 @@ class Server:
 
     def send_client(self, sock, message):
         sock.send(message.encode())
+
+    def send_file_udp(self, stream, stream_send, curr_download, port, host="127.0.0.1"):
+        window_size = 1
+        time_out = 1
+        stream.bind((host, port))
+        first_msg = True
+        while True:
+            if first_msg:
+                try:
+                    data, addr = stream.recvfrom(1024)
+                    first_msg = False
+                except timeout:
+                    continue
+            else:
+                i = 0
+                for key in curr_download.keys():
+                    if i == window_size:
+                        break
+                    i += 1
+                    stream.sendto(curr_download[key].encode(), addr)
+                i = 0
+                while i < window_size:
+                    stream.settimeout(time_out)
+                    try:
+                        data, addr = stream.recvfrom(5)
+                        self.curr_download.pop(int(data.decode()))
+                        i += 1
+                    except timeout:
+                        i += 1
+            if len(curr_download.keys()) == 0 and not stream_send:
+                first_msg = True
+
+    def write_to_dict(self, file, file_name, name):
+        size = os.path.getsize('./files/' + file_name)
+        size = size / 1014 + 1
+        byte = file.read(507)
+        ind = 1
+        if self.download_queue.get(name)[1] == 0:
+            self.download_queue[name] = (file, 1)
+            while byte and ind <= size:
+                if ind % 2 == 0:
+                    msg = self.ripud(ind)
+                    self.stream1[ind] = msg + byte
+                else:
+                    msg1 = self.ripud(ind)
+                    self.stream2[ind] = msg1 + byte
+        else:
+            self.download_queue.pop(name)
+            while byte and ind <= size:
+                if ind % 2 == 0:
+                    msg = self.ripud(ind)
+                    self.stream1[ind] = msg + byte
+                else:
+                    msg1 = self.ripud(ind)
+                    self.stream2[ind] = msg1 + byte
+
+    def ripud(self, ind):
+        if ind < 10:
+            return "0000" + str(ind)
+        elif ind < 100:
+            return "000" + str(ind)
+        elif ind < 1000:
+            return "00" + str(ind)
+        elif ind < 10000:
+            return "0" + str(ind)
+        else:
+            return str(ind)

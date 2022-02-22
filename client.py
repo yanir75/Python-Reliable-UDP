@@ -103,7 +103,7 @@ class Client:
     def proceed(self):
         self.socket.send(f'<proceed>'.encode())
 
-    def recv_and_send(self, port, start, address="127.0.0.1", buffer_size=1024):
+    def recv_and_send(self, port, start, address="127.0.0.1", buffer_size=512):
         """
         Receive the file from the server
         """
@@ -142,6 +142,8 @@ class Client:
                 break
             except:
                 sock.sendto(f'DONE!', (address, port))
+        self.file.close()
+        self.file = None
 
     def write_to_file(self, file):
         file.write(self.file_dict[self.ind].encode("ascii"))
