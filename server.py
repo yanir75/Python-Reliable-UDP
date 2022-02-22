@@ -74,6 +74,7 @@ class Server:
                         self.send_client(sock, "<file_not_found>")
 
 
+
             except Exception as e:
                 print(e)
                 self.clients.pop(sock)
