@@ -2,4 +2,4 @@ from client import *
 
 cl = Client()
 cl.connect("yanir")
-cl.disconnect()
+cl.set_msg("Hello")
