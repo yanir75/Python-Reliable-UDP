@@ -92,7 +92,7 @@ class Server:
                             self.available[1] = False
                             self.send_client(sock, f'<start>')
                             if name not in self.download_queue.keys():
-                                file = open('./files/' + file_name, 'r')
+                                file = open('./files/' + file_name, 'rb')
                                 self.download_queue[name] = (file, file_name)
                                 Thread(target=self.write_to_dict, args=(file, False, file_name)).start()
                             else:
@@ -150,7 +150,7 @@ class Server:
                     if i == window_size:
                         break
                     i += 1
-                    stream.sendto(curr_download[key].encode(), addr)
+                    stream.sendto(curr_download[key], addr)
                 self.lock.release()
                 j = 0
                 while j < i:
@@ -202,7 +202,7 @@ class Server:
         while byte:
             self.lock.acquire()
             if ind % 2 == 0:
-                msg = self.ripud(ind)
+                msg = self.ripud(ind).encode()
                 msg += byte
                 self.stream1_download[ind] = msg
                 ind += 1
@@ -212,7 +212,7 @@ class Server:
                     self.lock.release()
                     break
             else:
-                msg1 = self.ripud(ind)
+                msg1 = self.ripud(ind).encode()
                 msg1 += byte
                 self.stream2_download[ind] = msg1
                 ind += 1

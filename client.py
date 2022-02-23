@@ -90,7 +90,7 @@ class Client:
         """
         To be continued
         """
-        self.file = open(file_name, 'a')
+        self.file = open(file_name, 'ab')
         # self.threads.append(Thread(target=self.recv_and_send, args=(50010, 0)))
         # self.threads.append(Thread(target=self.recv_and_send, args=(50011, 0)))
         # for thread in self.threads:
@@ -152,11 +152,12 @@ class Client:
             except Exception as e:
                 print(e)
         while True:
-                print(f'{msg.decode()}')
+
+                #print(f'{msg.decode()}')
                 if self.ind % 2 == start % 2 and self.ind in self.file_dict.keys():
                     self.write_to_file()
-                value = msg.decode()
-                seq = value[:5]
+                value = msg
+                seq = value[:5].decode()
                 if seq == 'DONE!':
                     #sock.sendto(f'DONE!'.encode(), (address, port))
                     break
