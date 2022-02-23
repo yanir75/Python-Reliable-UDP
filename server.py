@@ -12,14 +12,12 @@ class Server:
         self.socket = socket(AF_INET, SOCK_STREAM)
         self.stream1 = socket(AF_INET, SOCK_DGRAM)
         self.stream2 = socket(AF_INET, SOCK_DGRAM)
-        self.available = True
+        self.available = [True, True]
+        self.streams_send = [True, True]
         self.lock = Lock()
 
         self.stream1_download = {}
         self.stream2_download = {}
-
-        self.stream1_send = False
-        self.stream2_send = False
 
         self.waiting_for_proceed = []
         self.download_queue = {}
@@ -35,8 +33,8 @@ class Server:
         """
         Run the server and listen for connections.
         """
-        Thread(target=self.send_file_udp, args=(self.stream1, self.stream1_send, self.stream1_download, 50010)).start()
-        Thread(target=self.send_file_udp, args=(self.stream2, self.stream2_send, self.stream2_download, 50011)).start()
+        Thread(target=self.send_file_udp, args=(self.stream1, self.stream1_download, 50010)).start()
+        Thread(target=self.send_file_udp, args=(self.stream2, self.stream2_download, 50011)).start()
         while True:
             # accept a connection from a client
             sock, addr = self.socket.accept()
@@ -89,10 +87,15 @@ class Server:
                     if not os.path.exists('./files/' + file_name):
                         self.send_client(sock, "<file_not_found>")
                     else:
-                        self.send_client(sock, f'<start>')
-                        file = open('./files/' + file_name, 'r')
-                        self.download_queue[name] = file
-                        Thread(target=self.write_to_dict, args=(file, 0, 0)).start()
+                        if self.available[0] and self.available[1]:
+                            self.available[0] = False
+                            self.available[1] = False
+                            self.send_client(sock, f'<start>')
+                            file = open('./files/' + file_name, 'r')
+                            self.download_queue[name] = file
+                            Thread(target=self.write_to_dict, args=(file, 0, 0)).start()
+                        else:
+                            self.send_client(sock, "<download_not_available>")
 
 
 
@@ -115,7 +118,7 @@ class Server:
     def send_client(self, sock, message):
         sock.send(message.encode())
 
-    def send_file_udp(self, stream, stream_send, curr_download, port, host="127.0.0.1"):
+    def send_file_udp(self, stream, curr_download, port, host="127.0.0.1"):
         window_size = 1
         time_out = 10
         stream.bind((host, port))
@@ -141,22 +144,29 @@ class Server:
                     stream.sendto(curr_download[key].encode(), addr)
                     print("send")
                 self.lock.release()
-                i = 0
-                while i < window_size:
+                j = 0
+                while j < i:
                     stream.settimeout(time_out)
                     try:
                         data, addr = stream.recvfrom(5)
                         curr_download.pop(int(data.decode()))
-                        i += 1
+                        j += 1
                     except timeout:
-                        i += 1
-            if len(curr_download.keys()) == 0 and not stream_send:
-                if not first_msg:
-                    stream.sendto("DONE!".encode(), addr)
+                        j += 1
+            while len(curr_download.keys()) == 0 and not self.streams_send[port % 2]:
                 first_msg = True
+                try:
+                    stream.settimeout(1)
+                    stream.sendto("DONE!".encode(), addr)
+                    data, addr = stream.recvfrom(1024)
+                    self.streams_send[port % 2] = True
+                    self.available[port % 2] = True
+                except timeout:
+                    print("timeout")
 
     def write_to_dict(self, file, file_name, name):
         print("started")
+        self.streams_send = True
         # size = os.path.getsize('./files/' + file_name)
         # size = size / 1014 + 1
         byte = file.read(507)
@@ -183,21 +193,18 @@ class Server:
             self.lock.acquire()
             if ind % 2 == 0:
                 msg = self.ripud(ind)
-                msg+=byte
+                msg += byte
                 self.stream1_download[ind] = msg
-                byte= file.read(507)
+                byte = file.read(507)
             else:
                 msg1 = self.ripud(ind)
-                print(f'before{msg1}')
                 msg1 += byte
-                print(f'after{msg1}')
                 self.stream2_download[ind] = msg1
                 byte = file.read(507)
             self.lock.release()
             ind += 1
         file.close()
-        self.stream1_send = False
-        self.stream2_send = False
+        self.streams_send = [False,False]
 
     def ripud(self, ind):
         if ind < 10:

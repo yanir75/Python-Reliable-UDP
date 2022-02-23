@@ -1,1 +1,6 @@
-print(-1%2)
+file = open("asdf", "a")
+file.write("asdf")
+file.close()
+file = open("asdf", "a")
+file.write("asdf")
+file.close()

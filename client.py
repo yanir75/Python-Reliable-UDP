@@ -75,7 +75,7 @@ class Client:
         """
         To be continued
         """
-        self.file = open(file_name, 'w')
+        self.file = open(file_name, 'a')
         # self.threads.append(Thread(target=self.recv_and_send, args=(50010, 0)))
         # self.threads.append(Thread(target=self.recv_and_send, args=(50011, 0)))
         # for thread in self.threads:
@@ -88,6 +88,7 @@ class Client:
         t2.join()
         while len(self.file_dict) != 0:
             self.write_to_file()
+        self.ind = 1
         self.file.close()
         self.file = None
 
@@ -121,6 +122,7 @@ class Client:
         """
         Receive the file from the server
         """
+        received = {}
         sock = socket(AF_INET, SOCK_DGRAM)
         sock.settimeout(10)
         first_msg = True
@@ -133,7 +135,7 @@ class Client:
             except Exception as e:
                 print(e)
         while True:
-                #print(f'{msg.decode()}')
+                print(f'{msg.decode()}')
                 if self.ind % 2 == start % 2 and self.ind in self.file_dict.keys():
                     self.write_to_file()
                 value = msg.decode()
@@ -142,24 +144,26 @@ class Client:
                     sock.sendto(f'DONE!'.encode(), (address, port))
                     break
                 seq = int(seq)
-                data = value[5:]
-                self.lock.acquire()
-                self.file_dict[seq] = data
-                self.lock.release()
+                if seq not in received.keys():
+                    data = value[5:]
+                    self.lock.acquire()
+                    self.file_dict[seq] = data
+                    received[seq] = True
+                    self.lock.release()
                 sock.sendto(f'{seq}'.encode(),(address, port))
                 msg,addr = sock.recvfrom(buffer_size)
 
-        # sock.settimeout(5.0)
-        # while True:
-        #     try:
-        #         sock.recvfrom(buffer_size)
-        #         break
-        #     except:
-        #         sock.sendto(f'DONE!'.encode(), (address, port))
+        sock.settimeout(5.0)
+        while True:
+            try:
+                sock.sendto(f'DONE!'.encode(), (address, port))
+                sock.recvfrom(buffer_size)
+            except timeout:
+                break
 
     def write_to_file(self):
-        #print("writing to file")
-        #print(self.file_dict[self.ind])
+        print("writing to file")
+        print(self.file_dict[self.ind])
         self.file.write(self.file_dict[self.ind])
         self.file_dict.pop(self.ind)
         self.ind += 1
