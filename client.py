@@ -20,6 +20,7 @@ class Client:
         self.ind = 1
         self.file = None
         self.downloading = False
+        self.delete_count = 0
 
     def connect(self, name, host='127.0.0.1', port=50000):
         """
@@ -69,6 +70,14 @@ class Client:
         Requests to download a file from the server
         """
         if not self.downloading:
+            self.delete_count+=1
+            if self.file_name != file_name and self.delete_count == 3:
+                self.delete_count = 1
+            if self.file_name != file_name and self.delete_count == 2:
+                # delete file if it exists
+                if os.path.exists(self.file_name):
+                    os.remove(self.file_name)
+                self.delete_count = 1
             self.socket.send(f'<download><{file_name}>'.encode())
             self.file_name = file_name
             time.sleep(0.1)

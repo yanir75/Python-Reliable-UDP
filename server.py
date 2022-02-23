@@ -93,11 +93,15 @@ class Server:
                             self.send_client(sock, f'<start>')
                             if name not in self.download_queue.keys():
                                 file = open('./files/' + file_name, 'r')
-                                self.download_queue[name] = file
+                                self.download_queue[name] = (file, file_name)
                                 Thread(target=self.write_to_dict, args=(file, False, file_name)).start()
                             else:
-                                Thread(target=self.write_to_dict,
-                                       args=(self.download_queue[name], True, file_name)).start()
+                                if file_name != self.download_queue[name][1]:
+                                    file = self.download_queue[name][0]
+                                    file.close()
+                                    file = open('./files/' + file_name, 'r')
+                                    self.download_queue[name] = (file, file_name)
+                                Thread(target=self.write_to_dict, args=(self.download_queue[name][0], True, file_name)).start()
                                 self.download_queue.pop(name)
                         else:
                             self.send_client(sock, "<download_not_available>")
