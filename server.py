@@ -91,9 +91,14 @@ class Server:
                             self.available[0] = False
                             self.available[1] = False
                             self.send_client(sock, f'<start>')
-                            file = open('./files/' + file_name, 'r')
-                            self.download_queue[name] = file
-                            Thread(target=self.write_to_dict, args=(file, 0, 0)).start()
+                            if name not in self.download_queue.keys():
+                                file = open('./files/' + file_name, 'r')
+                                self.download_queue[name] = file
+                                Thread(target=self.write_to_dict, args=(file, False, file_name)).start()
+                            else:
+                                Thread(target=self.write_to_dict,
+                                       args=(self.download_queue[name], True, file_name)).start()
+                                self.download_queue.pop(name)
                         else:
                             self.send_client(sock, "<download_not_available>")
 
@@ -132,7 +137,7 @@ class Server:
                     print("test")
                     print(curr_download)
                 except timeout:
-                    print("timeout")
+                    print("time____out")
             else:
                 i = 0
                 # synchronize the stream
@@ -142,7 +147,6 @@ class Server:
                         break
                     i += 1
                     stream.sendto(curr_download[key].encode(), addr)
-                    print("send")
                 self.lock.release()
                 j = 0
                 while j < i:
@@ -159,16 +163,18 @@ class Server:
                     stream.settimeout(1)
                     stream.sendto("DONE!".encode(), addr)
                     data, addr = stream.recvfrom(1024)
+                    if data.decode() != "DONE!":
+                        raise timeout
                     self.streams_send[port % 2] = True
                     self.available[port % 2] = True
                 except timeout:
                     print("timeout")
 
-    def write_to_dict(self, file, file_name, name):
+    def write_to_dict(self, file, close_file, file_name):
         print("started")
-        self.streams_send = True
-        # size = os.path.getsize('./files/' + file_name)
-        # size = size / 1014 + 1
+        self.streams_send = [True,True]
+        packet_size = os.path.getsize('./files/' + file_name)
+        packet_size = packet_size / 1014 + 1
         byte = file.read(507)
         ind = 1
         # if self.download_queue.get(name)[1] == 0:
@@ -195,16 +201,26 @@ class Server:
                 msg = self.ripud(ind)
                 msg += byte
                 self.stream1_download[ind] = msg
-                byte = file.read(507)
+                ind += 1
+                if ind<=packet_size:
+                    byte = file.read(507)
+                else:
+                    self.lock.release()
+                    break
             else:
                 msg1 = self.ripud(ind)
                 msg1 += byte
                 self.stream2_download[ind] = msg1
-                byte = file.read(507)
+                ind += 1
+                if ind<=packet_size:
+                    byte = file.read(507)
+                else:
+                    self.lock.release()
+                    break
             self.lock.release()
-            ind += 1
-        file.close()
-        self.streams_send = [False,False]
+        if close_file:
+            file.close()
+        self.streams_send = [False, False]
 
     def ripud(self, ind):
         if ind < 10:

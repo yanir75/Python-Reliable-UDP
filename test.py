@@ -1,6 +1,3 @@
-file = open("asdf", "a")
-file.write("asdf")
-file.close()
-file = open("asdf", "a")
-file.write("asdf")
-file.close()
+f = [True,True]
+while f[0]:
+    f[0] = False

@@ -19,6 +19,7 @@ class Client:
         self.threads = []
         self.ind = 1
         self.file = None
+        self.downloading = False
 
     def connect(self, name, host='127.0.0.1', port=50000):
         """
@@ -67,11 +68,16 @@ class Client:
         """
         Requests to download a file from the server
         """
-        self.socket.send(f'<download><{file_name}>'.encode())
-        self.file_name = file_name
-        time.sleep(0.1)
+        if not self.downloading:
+            self.socket.send(f'<download><{file_name}>'.encode())
+            self.file_name = file_name
+            time.sleep(0.1)
+        else:
+            print("You are in a middle wait you piece of shit")
+
 
     def download_file(self, file_name):
+        self.downloading = True
         """
         To be continued
         """
@@ -87,10 +93,12 @@ class Client:
         t1.join()
         t2.join()
         while len(self.file_dict) != 0:
+            print(self.file_dict)
             self.write_to_file()
         self.ind = 1
         self.file.close()
         self.file = None
+        self.downloading = False
 
     def get_msg(self):
         """
@@ -141,7 +149,7 @@ class Client:
                 value = msg.decode()
                 seq = value[:5]
                 if seq == 'DONE!':
-                    sock.sendto(f'DONE!'.encode(), (address, port))
+                    #sock.sendto(f'DONE!'.encode(), (address, port))
                     break
                 seq = int(seq)
                 if seq not in received.keys():
