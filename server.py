@@ -32,7 +32,7 @@ class Server:
         self.socket.listen(5)
         # create a list of clients to store the clients connected to the server
         self.clients = {}
-        self.window_size = 1
+        self.window_size = 5
 
     def run(self,packet_size=1024):
         """
@@ -170,6 +170,8 @@ class Server:
                         curr_download.pop(int(data.decode()))
                         j += 1
                     except timeout:
+                        j += 1
+                    except KeyError:
                         j += 1
             while len(curr_download.keys()) == 0 and not self.streams_send[port % self.num_of_streams]:
                 first_msg = True
