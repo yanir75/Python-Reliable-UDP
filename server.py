@@ -195,7 +195,6 @@ class Server:
         byte = file.read(packet_size)
         ind = 1
         while byte:
-            self.lock.acquire()
             key = self.ripud(ind)
             msg = key.encode()
             msg += byte
@@ -204,9 +203,7 @@ class Server:
             if ind <= num_of_packets:
                 byte = file.read(packet_size)
             else:
-                self.lock.release()
                 break
-            self.lock.release()
         if close_file:
             file.close()
         for i in range(self.num_of_streams):
