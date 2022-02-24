@@ -123,12 +123,6 @@ class Client:
             if message == '<disconnected>':
                 self.socket.close()
                 self.running = False
-            if message == '<middle>':
-                for thread in self.threads:
-                    thread.wait()
-            if message == '<proceeded>':
-                for thread in self.threads:
-                    thread.notify()
             if message == '<start>':
                 Thread(target=self.download_file, args=(self.file_name,)).start()
 
