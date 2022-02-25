@@ -3,11 +3,11 @@ import time
 from socket import *
 from threading import *
 
-#TODO: add comments
-#TODO: add remove numbers
+
+# TODO: add comments
 
 class Client:
-    def __init__(self):
+    def __init__(self, udp_port=50010, download_streams=2):
         """
         Initialize the client.
         """
@@ -23,6 +23,8 @@ class Client:
         self.file = None
         self.downloading = False
         self.delete_count = 0
+        self.download_streams = download_streams
+        self.udp_port = udp_port
 
     def connect(self, name, host='127.0.0.1', port=50000):
         """
@@ -72,7 +74,7 @@ class Client:
         Requests to download a file from the server
         """
         if not self.downloading:
-            self.delete_count+=1
+            self.delete_count += 1
             if self.file_name != file_name and self.delete_count == 3:
                 self.delete_count = 1
             if self.file_name != file_name and self.delete_count == 2:
@@ -86,7 +88,6 @@ class Client:
         else:
             print("You are in a middle wait you piece of shit")
 
-
     def download_file(self, file_name):
         self.downloading = True
         """
@@ -97,12 +98,19 @@ class Client:
         # self.threads.append(Thread(target=self.recv_and_send, args=(50011, 0)))
         # for thread in self.threads:
         #     thread.start()
-        t1 = Thread(target=self.recv_and_send, args=(50010, 0))
-        t2 = Thread(target=self.recv_and_send, args=(50011, -1))
-        t2.start()
-        t1.start()
-        t1.join()
-        t2.join()
+        threads = []
+        for i in range(self.download_streams):
+            threads.append(Thread(target=self.recv_and_send, args=(50010 + i, -i)))
+        for i in range(self.download_streams - 1, -1, -1):
+            threads[i].start()
+        for i in range(self.download_streams):
+            threads[i].join()
+
+        # t2 = Thread(target=self.recv_and_send, args=(50011, -1))
+        # t2.start()
+        # t1.start()
+        # t1.join()
+        # t2.join()
         while len(self.file_dict) != 0:
             print(self.file_dict)
             self.write_to_file()
@@ -128,12 +136,11 @@ class Client:
             if message == '<start>':
                 Thread(target=self.download_file, args=(self.file_name,)).start()
 
-
     def recv_and_send(self, port, start, address="127.0.0.1", buffer_size=512):
         """
         Receive the file from the server
         """
-        #TODO: modify timeout
+        # TODO: modify timeout
         received = {}
         sock = socket(AF_INET, SOCK_DGRAM)
         sock.settimeout(10)
@@ -141,30 +148,30 @@ class Client:
         while first_msg:
             try:
                 sock.sendto(f'{start}'.encode(), (address, port))
-                msg,addr = sock.recvfrom(buffer_size)
+                msg, addr = sock.recvfrom(buffer_size)
                 first_msg = False
                 sock.settimeout(100)
             except Exception as e:
                 print(e)
         while True:
 
-                #print(f'{msg.decode()}')
-                if self.ind % 2 == start % 2 and self.ind in self.file_dict.keys():
-                    self.write_to_file()
-                value = msg
-                seq = value[:5].decode()
-                if seq == 'DONE!':
-                    #sock.sendto(f'DONE!'.encode(), (address, port))
-                    break
-                seq = int(seq)
-                if seq not in received.keys():
-                    data = value[5:]
-                    self.lock.acquire()
-                    self.file_dict[seq] = data
-                    received[seq] = True
-                    self.lock.release()
-                sock.sendto(f'{seq}'.encode(),(address, port))
-                msg,addr = sock.recvfrom(buffer_size)
+            # print(f'{msg.decode()}')
+            if self.ind % self.download_streams == start % self.download_streams and self.ind in self.file_dict.keys():
+                self.write_to_file()
+            value = msg
+            seq = value[:5].decode()
+            if seq == 'DONE!':
+                # sock.sendto(f'DONE!'.encode(), (address, port))
+                break
+            seq = int(seq)
+            if seq not in received.keys():
+                data = value[5:]
+                self.lock.acquire()
+                self.file_dict[seq] = data
+                received[seq] = True
+                self.lock.release()
+            sock.sendto(f'{seq}'.encode(), (address, port))
+            msg, addr = sock.recvfrom(buffer_size)
 
         sock.settimeout(5.0)
         while True:
