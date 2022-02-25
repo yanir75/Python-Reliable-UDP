@@ -3,6 +3,8 @@ import time
 from socket import *
 from threading import *
 
+#TODO: add comments
+#TODO: add remove numbers
 
 class Client:
     def __init__(self):
@@ -126,13 +128,12 @@ class Client:
             if message == '<start>':
                 Thread(target=self.download_file, args=(self.file_name,)).start()
 
-    def proceed(self):
-        self.socket.send(f'<proceed>'.encode())
 
     def recv_and_send(self, port, start, address="127.0.0.1", buffer_size=512):
         """
         Receive the file from the server
         """
+        #TODO: modify timeout
         received = {}
         sock = socket(AF_INET, SOCK_DGRAM)
         sock.settimeout(10)

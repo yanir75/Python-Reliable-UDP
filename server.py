@@ -2,7 +2,7 @@ import os
 from socket import *
 from threading import *
 
-
+#TODO: add comments
 class Server:
     def __init__(self, address="127.0.0.1", tcp_port=50000, udp_port=50010, num_of_streams=2):
         """
@@ -163,6 +163,7 @@ class Server:
                     stream.sendto(curr_download[key], addr)
                 self.lock.release()
                 j = 0
+                #TODO: modify window size and timeout
                 while j < i:
                     stream.settimeout(time_out)
                     try:
