@@ -1,6 +1,7 @@
 import os
 from socket import *
-from threading import *
+#from threading import *
+from concurrent.futures import ThreadPoolExecutor
 
 
 class Server:
@@ -16,12 +17,12 @@ class Server:
         self.udp_port = udp_port
         self.num_of_streams = num_of_streams
         self.streams_download = []
+        self.exec = ThreadPoolExecutor()
         for _ in range(self.num_of_streams):
             self.available.append(True)
             self.streams_send.append(True)
             self.streams.append(socket(AF_INET, SOCK_DGRAM))
             self.streams_download.append({})
-        self.lock = Lock()
         self.address = address
         self.waiting_for_proceed = []
         self.download_queue = {}
@@ -39,8 +40,9 @@ class Server:
         Run the server and listen for connections.
         """
         for i in range(self.num_of_streams):
-            Thread(target=self.send_file_udp,
-                   args=(self.streams[i], self.streams_download[i], self.udp_port + i)).start()
+            #Thread(target=self.send_file_udp,
+             #      args=(self.streams[i], self.streams_download[i], self.udp_port + i)).start()
+            self.exec.submit(self.send_file_udp, self.streams[i], self.streams_download[i], self.udp_port + i)
         while True:
             # accept a connection from a client
             sock, addr = self.socket.accept()
@@ -52,7 +54,8 @@ class Server:
             self.send_client(sock, "<connected>")
             self.clients[sock] = name
             # create a thread to handle the client
-            Thread(target=self.handle_client, args=(sock, name)).start()
+            #Thread(target=self.handle_client, args=(sock, name)).start()
+            self.exec.submit(self.handle_client, sock, name)
 
     def handle_client(self, sock, name, packet_size=1024):
         """
@@ -102,15 +105,17 @@ class Server:
                             if name not in self.download_queue.keys():
                                 file = open('./files/' + file_name, 'rb')
                                 self.download_queue[name] = (file, file_name)
-                                Thread(target=self.write_to_dict, args=(file, False, file_name)).start()
+                               # Thread(target=self.write_to_dict, args=(file, False, file_name)).start()
+                                self.exec.submit(self.write_to_dict, file, False, file_name)
                             else:
                                 if file_name != self.download_queue[name][1]:
                                     file = self.download_queue[name][0]
                                     file.close()
                                     file = open('./files/' + file_name, 'r')
                                     self.download_queue[name] = (file, file_name)
-                                Thread(target=self.write_to_dict,
-                                       args=(self.download_queue[name][0], True, file_name)).start()
+                                #Thread(target=self.write_to_dict,
+                                #       args=(self.download_queue[name][0], True, file_name)).start()
+                                self.exec.submit(self.write_to_dict, self.download_queue[name][0], True, file_name)
                                 self.download_queue.pop(name)
                         else:
                             self.send_client(sock, "<download_not_available>")
@@ -155,13 +160,13 @@ class Server:
             else:
                 i = 0
                 # synchronize the stream
-                self.lock.acquire()
+                #self.lock.acquire()
                 for key in curr_download.keys():
                     if i == window_size:
                         break
                     i += 1
                     stream.sendto(curr_download[key], addr)
-                self.lock.release()
+                #self.lock.release()
                 j = 0
                 while j < i:
                     stream.settimeout(time_out)
