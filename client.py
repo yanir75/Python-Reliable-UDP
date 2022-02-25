@@ -102,7 +102,7 @@ class Client:
         t1.join()
         t2.join()
         while len(self.file_dict) != 0:
-            #print(self.file_dict)
+            print(self.file_dict)
             self.write_to_file()
         self.ind = 1
         self.file.close()
@@ -174,8 +174,8 @@ class Client:
                 break
 
     def write_to_file(self):
-        #print("writing to file")
-        #print(self.file_dict[self.ind])
+        print("writing to file")
+        print(self.file_dict[self.ind])
         self.file.write(self.file_dict[self.ind])
         self.file_dict.pop(self.ind)
         self.ind += 1
