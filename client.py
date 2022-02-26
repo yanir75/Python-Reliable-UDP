@@ -18,6 +18,8 @@ class Client:
         :param udp_port: Port start of the udp streams
         :param download_streams: amount of udp streams
         """
+        self.activate = []
+        self.deactivate = []
         self.DEBUG = DEBUG
         if DEBUG:
             logging.basicConfig(filename="client_logfile.log",
@@ -134,6 +136,8 @@ class Client:
         """
         Download the file from the server
         """
+        for func in self.deactivate:
+            func()
         # open the file for binary reading
         self.file = open(file_name, 'ab')
         if self.DEBUG:
@@ -160,6 +164,16 @@ class Client:
         self.file.close()
         self.file = None
         self.downloading = False
+        if self.delete_count == 1:
+            for func in self.funcs:
+                func("Finished downloading half of the file, if you want to proceed enter the same file name and "
+                     "press download again")
+        elif self.delete_count == 2:
+            for func in self.funcs:
+                func("Finished downloading the file")
+        for func in self.activate:
+            func()
+
         if self.DEBUG:
             self.logger.info(f'Finished downloading file {file_name}')
 

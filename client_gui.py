@@ -64,6 +64,8 @@ def connect(to_close_window, client, name):
     scrollbar.config(command=text_box.yview)
     # functions to activate on each message
     client.funcs.append(lambda message: update_chat(text_box, message))
+    client.activate.append(lambda: enable_button(download_button))
+    client.deactivate.append(lambda: disable_button(download_button))
     client_window.mainloop()
 
 
@@ -110,5 +112,10 @@ def start():
     # create new window and close current one
 
     window.mainloop()
+
+def disable_button(button):
+    button['state'] = 'disabled'
+def enable_button(button):
+    button['state'] = 'normal'
 
 start()
