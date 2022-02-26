@@ -23,6 +23,7 @@ class Server:
         self.available = []
         # Is the UDP stream transmitting
         self.streams_send = []
+        self.funcs = []
 
         # self explanatory
         self.udp_port = udp_port
@@ -66,6 +67,8 @@ class Server:
             # print(name)
             # add the client to the list of clients
             self.send_message_to_all("A new member has entered the chat: " + name)
+            for func in self.funcs:
+                func("A new member has entered the chat: " + name)
             self.send_client(sock, "<connected>")
             self.clients[sock] = name
             # create a thread to handle the client
@@ -87,6 +90,8 @@ class Server:
                 # print(msgs)
                 # handle the message
                 for message in msgs[:-1]:
+                    for func in self.funcs:
+                        func(f'{name}: {message}')
                     #    print(message)
                     # disconnect the client
                     if message == "<disconnect>":

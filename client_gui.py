@@ -30,7 +30,6 @@ def connect(to_close_window, client, name):
                                  font=font.Font(size=18, weight='bold', family='courier'))
     get_files_button.place(x=305, y=0)
 
-
     # two input boxes and button sending information to server
     # add two labels above the input boxes
     tk.Label(client_window, text="To (Type all)", bg='#86daeb').place(x=5, y=470)
@@ -44,14 +43,14 @@ def connect(to_close_window, client, name):
     send_button.place(x=530, y=493, height=32)
 
     # download file button to download file from server
-    tk.Label(client_window, text="File name to download", bg='#86daeb', font=font.Font(size=11, family='courier')).place(x=5, y=415)
+    tk.Label(client_window, text="File name to download", bg='#86daeb',
+             font=font.Font(size=11, family='courier')).place(x=5, y=415)
 
     download = tk.Entry(client_window, width=85)
     download.place(x=10, y=437, height=30)
     download_button = tk.Button(client_window, text="Download", command=lambda: client.download(download.get()),
                                 width=8, fg='black', bg='#6faaf8')
     download_button.place(x=530, y=438, height=32)
-
 
     # label for displaying messages
     tk.Label(client_window, text="Messages", bg='#86daeb', font=font.Font(size=11, family='courier')).place(x=5, y=50)
@@ -87,6 +86,7 @@ def disconnect(close_window, client):
     client.disconnect()
     close_window.destroy()
 
+
 def start():
     cl = Client()
     # Create a window
@@ -103,7 +103,8 @@ def start():
     entry = tk.Entry(window, textvariable=input_value, width=25)
     # create a button
 
-    button = tk.Button(window, text="Connect", command=lambda: connect(window, cl, input_value.get()), height=7, fg='black',
+    button = tk.Button(window, text="Connect", command=lambda: connect(window, cl, input_value.get()), height=7,
+                       fg='black',
                        bg='#6faaf8', font=font.Font(size=14, weight='bold', family='courier'))
     # pack the widgets
     entry.pack(side=tk.LEFT, padx=15, pady=20)
@@ -113,9 +114,13 @@ def start():
 
     window.mainloop()
 
+
 def disable_button(button):
     button['state'] = 'disabled'
+
+
 def enable_button(button):
     button['state'] = 'normal'
+
 
 start()
