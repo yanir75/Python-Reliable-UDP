@@ -56,11 +56,9 @@ class Client:
         Send a message to a specific client
         """
         if name == 'all':
-            self.socket.send(f'<set_msg_all><{message}>'.encode())
-            time.sleep(0.1)
+            self.socket.send(f'<set_msg_all><{message}>!@#$'.encode())
         else:
-            self.socket.send(f'<set_msg><{name}><{message}>'.encode())
-            time.sleep(0.1)
+            self.socket.send(f'<set_msg><{name}><{message}>!@#$'.encode())
 
     def get_list_file(self):
         """
@@ -136,7 +134,7 @@ class Client:
             if message == '<start>':
                 Thread(target=self.download_file, args=(self.file_name,)).start()
 
-    def recv_and_send(self, port, start, address="127.0.0.1", buffer_size=512):
+    def recv_and_send(self, port, start=-99, address="127.0.0.1", buffer_size=512):
         """
         Receive the file from the server
         """
@@ -147,14 +145,13 @@ class Client:
         first_msg = True
         while first_msg:
             try:
-                sock.sendto(f'{start}'.encode(), (address, port))
+                sock.sendto(start.to_bytes(5, byteorder="big", signed=True), (address, port))
                 msg, addr = sock.recvfrom(buffer_size)
                 first_msg = False
                 sock.settimeout(100)
             except Exception as e:
                 print(e)
         while True:
-
             # print(f'{msg.decode()}')
             if self.ind % self.download_streams == start % self.download_streams and self.ind in self.file_dict.keys():
                 self.write_to_file()
@@ -170,13 +167,17 @@ class Client:
                 self.file_dict[seq] = data
                 received[seq] = True
                 self.lock.release()
-            sock.sendto(f'{seq}'.encode(), (address, port))
-            msg, addr = sock.recvfrom(buffer_size)
+            sock.sendto(seq.to_bytes(5, byteorder='big', signed=True), (address, port))
+            try:
+                msg, addr = sock.recvfrom(buffer_size)
+            except timeout:
+                print("timeout")
 
         sock.settimeout(5.0)
         while True:
             try:
-                sock.sendto(f'DONE!'.encode(), (address, port))
+                fin = -100
+                sock.sendto(fin.to_bytes(5, byteorder='big', signed=True), (address, port))
                 sock.recvfrom(buffer_size)
             except timeout:
                 break
