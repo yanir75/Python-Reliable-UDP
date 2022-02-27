@@ -5,7 +5,7 @@ from server import Server
 
 
 def start():
-    server = Server()
+    server = Server("10.9.0.247")
     # Create a window
     window = tk.Tk()
     window.title("Connect window")
@@ -19,6 +19,7 @@ def start():
     button = tk.Button(window, text="Start", command=lambda: Thread(target=server.run).start(), height=7,
                        fg='black',
                        bg='#6faaf8', font=font.Font(size=14, weight='bold', family='courier'))
+    # disconnect all button
     # disable the button after click
     server.disable.append( lambda: disable_button(button))
     # pack the widgets
@@ -28,6 +29,12 @@ def start():
     scrollbar = tk.Scrollbar(window, command=text_box.yview)
     scrollbar.place(x=570, y=242, height=325)
     server.funcs.append(lambda msg: update_chat(text_box, msg))
+
+    # add disconnect button
+    dis_button = tk.Button(window, text="Disconnect", command=lambda: server.disconnect_all())
+    dis_button.place(x=20, y=20)
+    # on exit, disconnect all
+    window.protocol("WM_DELETE_WINDOW", lambda: server.disconnect_all())
     # start the main loop
     # create new window and close current one
 

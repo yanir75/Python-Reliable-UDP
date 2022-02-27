@@ -1,3 +1,4 @@
+import os
 import tkinter as tk
 from tkinter import font
 
@@ -38,7 +39,8 @@ def connect(to_close_window, client, name):
     msg = tk.Entry(client_window, width=70)
     name.place(x=10, y=495, height=30)
     msg.place(x=100, y=495, height=30)
-    send_button = tk.Button(client_window, text="Send", command=lambda: client.set_msg(msg.get(), name.get()),
+    send_button = tk.Button(client_window, text="Send",
+                            command=lambda: client.set_msg(msg.get(), name.get()),
                             width=8, fg='black', bg='#6faaf8')
     send_button.place(x=530, y=493, height=32)
 
@@ -62,17 +64,21 @@ def connect(to_close_window, client, name):
     scrollbar.place(x=570, y=70, height=325)
     scrollbar.config(command=text_box.yview)
     # functions to activate on each message
-    client.funcs.append(lambda message: update_chat(text_box, message))
+    client.funcs.append(lambda message: update_chat(text_box, message,client_window,client))
     client.activate.append(lambda: enable_button(download_button))
     client.deactivate.append(lambda: disable_button(download_button))
+    # on exit close the window and disconnect from server
+    client_window.protocol("WM_DELETE_WINDOW", lambda: disconnect(client_window, client))
     client_window.mainloop()
 
 
-def update_chat(text_box, msg):
+def update_chat(text_box, msg, client_window, client):
     # update the text box according to received message
     text_box.config(state="normal")
     msg = msg.split("<")
     for m in msg:
+        if m == "disconnected>":
+            os._exit(0)
         if len(m) > 0:
             if m[-1] == ">":
                 text_box.insert(tk.END, m[:-1] + "\n")
@@ -85,6 +91,7 @@ def update_chat(text_box, msg):
 def disconnect(close_window, client):
     client.disconnect()
     close_window.destroy()
+    os._exit(0)
 
 
 def start():

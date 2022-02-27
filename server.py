@@ -1,4 +1,5 @@
 import os
+import time
 from socket import *
 from threading import *
 
@@ -316,3 +317,8 @@ class Server:
         # change the streams to not sending, meaning we are done editing their dictionary
         for i in range(self.num_of_streams):
             self.streams_send[i] = False
+
+    def disconnect_all(self):
+        self.send_message_to_all("<disconnected>")
+        self.socket.close()
+        os._exit(0)

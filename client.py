@@ -54,7 +54,7 @@ class Client:
         self.download_streams = download_streams
         self.udp_port = udp_port
 
-    def connect(self, name, host='127.0.0.1', port=50000):
+    def connect(self, name, host='10.9.0.247', port=50000):
         """
         Connect to the server
         <connect><name>!@#$
