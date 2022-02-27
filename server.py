@@ -94,6 +94,7 @@ class Server:
                 # print(msgs)
                 # handle the message
                 for message in msgs[:-1]:
+                    print(message)
                     for func in self.funcs:
                         func(f'{name}: {message}')
                     #    print(message)

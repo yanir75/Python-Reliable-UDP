@@ -5,7 +5,7 @@ from server import Server
 
 
 def start():
-    server = Server("10.9.0.247")
+    server = Server()
     # Create a window
     window = tk.Tk()
     window.title("Connect window")

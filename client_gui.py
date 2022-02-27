@@ -5,8 +5,8 @@ from tkinter import font
 from client import Client
 
 
-def connect(to_close_window, client, name):
-    client.connect(name)
+def connect(to_close_window, client, name,ip):
+    client.connect(name,ip)
     to_close_window.destroy()
     # create a window
     client_window = tk.Tk()
@@ -109,8 +109,11 @@ def start():
     # create a text box
     entry = tk.Entry(window, textvariable=input_value, width=25)
     # create a button
-
-    button = tk.Button(window, text="Connect", command=lambda: connect(window, cl, input_value.get()), height=7,
+    ip_entry = tk.Entry(window, width=25)
+    ip_entry.place(x=15, y=60)
+    # default string for entry
+    ip_entry.insert(0, "127.0.0.1")
+    button = tk.Button(window, text="Connect", command=lambda: connect(window, cl, input_value.get(),ip_entry.get()), height=7,
                        fg='black',
                        bg='#6faaf8', font=font.Font(size=14, weight='bold', family='courier'))
     # pack the widgets
