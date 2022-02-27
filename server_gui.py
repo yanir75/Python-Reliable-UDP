@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import font
-
+from threading import Thread
 from server import Server
 
 
@@ -16,16 +16,17 @@ def start():
     # create a text box
     # create a button
 
-    button = tk.Button(window, text="Start", command=lambda: server.run(), height=7,
+    button = tk.Button(window, text="Start", command=lambda: Thread(target=server.run).start(), height=7,
                        fg='black',
                        bg='#6faaf8', font=font.Font(size=14, weight='bold', family='courier'))
     # disable the button after click
+    server.disable.append( lambda: disable_button(button))
     # pack the widgets
     button.pack(side=tk.TOP, padx=15, pady=20)
     text_box = tk.Text(window, width=70, height=20, state="disabled")
     text_box.pack(side=tk.LEFT, padx=15, pady=20)
     scrollbar = tk.Scrollbar(window, command=text_box.yview)
-    scrollbar.place(x=570, y=70, height=325)
+    scrollbar.place(x=570, y=242, height=325)
     server.funcs.append(lambda msg: update_chat(text_box, msg))
     # start the main loop
     # create new window and close current one
@@ -49,6 +50,11 @@ def update_chat(text_box, msg):
 
 def run(server):
     server.run()
+
+
+def disable_button(button):
+    button.config(state="disabled")
+
 
 
 start()

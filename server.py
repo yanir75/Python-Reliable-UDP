@@ -15,6 +15,7 @@ class Server:
         :param udp_port: UDP socket ports
         :param num_of_streams: Number of UDP parallel streams
         """
+        self.disable = []
         # AF_inet = IPv4 address family and SOCK_STREAM = TCP
         self.socket = socket(AF_INET, SOCK_STREAM)
         # UDP streams (sockets) list
@@ -54,6 +55,8 @@ class Server:
         :param packet_size: to receive at a time
         :return:
         """
+        for i in self.disable:
+            i()
         # run the UDP streams to listen to file downloads
         for i in range(self.num_of_streams):
             Thread(target=self.send_file_udp,

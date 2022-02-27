@@ -20,15 +20,15 @@ class Client:
         """
         self.activate = []
         self.deactivate = []
-        self.DEBUG = DEBUG
-        if DEBUG:
-            logging.basicConfig(filename="client_logfile.log",
-                                filemode='a',
-                                format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-                                datefmt='%H:%M:%S',
-                                level=logging.INFO)
-
-            self.logger = logging.getLogger('Client')
+        # self.DEBUG = DEBUG
+        # if DEBUG:
+        #     logging.basicConfig(filename="client_logfile.log",
+        #                         filemode='a',
+        #                         format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+        #                         datefmt='%H:%M:%S',
+        #                         level=logging.INFO)
+        #
+        #     self.logger = logging.getLogger('Client')
         # File name
         self.file_name = ""
         # running flag
@@ -89,20 +89,20 @@ class Client:
         """
         if name == 'all':
             self.socket.send(f'<set_msg_all><{message}>!@#$'.encode())
-            if self.DEBUG:
-                self.logger.info(f'send <set_msg_all><{message}>!@#$')
+            # if self.DEBUG:
+            #     self.logger.info(f'send <set_msg_all><{message}>!@#$')
         else:
             self.socket.send(f'<set_msg><{name}><{message}>!@#$'.encode())
-            if self.DEBUG:
-                self.logger.info(f'send <set_msg><{name}><{message}>!@#$')
+            # if self.DEBUG:
+            #     self.logger.info(f'send <set_msg><{name}><{message}>!@#$')
 
     def get_list_file(self):
         """
         Receive a list of downloadable files from the server
         """
         self.socket.send(f'<get_list_file>!@#$'.encode())
-        if self.DEBUG:
-            self.logger.info(f'send <get_list_file>!@#$')
+        # if self.DEBUG:
+        #     self.logger.info(f'send <get_list_file>!@#$')
 
     def download(self, file_name):
         """
@@ -123,11 +123,11 @@ class Client:
                     os.remove(self.file_name)
                 self.delete_count = 1
             self.socket.send(f'<download><{file_name}>!@#$'.encode())
-            if self.DEBUG:
-                self.logger.info(f'send <download><{file_name}>!@#$')
+            # if self.DEBUG:
+            #     self.logger.info(f'send <download><{file_name}>!@#$')
             self.file_name = file_name
         else:
-            self.logger.warning('Already downloading a file')
+            # self.logger.warning('Already downloading a file')
             for func in self.funcs:
                 func("<You are in a middle wait you piece of shit>")
 
@@ -140,8 +140,8 @@ class Client:
             func()
         # open the file for binary reading
         self.file = open(file_name, 'ab')
-        if self.DEBUG:
-            self.logger.info(f'file opened for writing {file_name}')
+        # if self.DEBUG:
+        #     self.logger.info(f'file opened for writing {file_name}')
         # self.threads.append(Thread(target=self.recv_and_send, args=(50010, 0)))
         # self.threads.append(Thread(target=self.recv_and_send, args=(50011, 0)))
         # for thread in self.threads:
@@ -174,8 +174,8 @@ class Client:
         for func in self.activate:
             func()
 
-        if self.DEBUG:
-            self.logger.info(f'Finished downloading file {file_name}')
+        # if self.DEBUG:
+        #     self.logger.info(f'Finished downloading file {file_name}')
 
     def get_msg(self):
         """
@@ -186,8 +186,8 @@ class Client:
         while self.running:
             # Receive the message from the server
             message = self.socket.recv(1024).decode()
-            if self.DEBUG:
-                self.logger.info(f'received {message}')
+            # if self.DEBUG:
+            #     self.logger.info(f'received {message}')
             # print(message)
             # activate the functions on each message
             for func in self.funcs:
@@ -218,7 +218,8 @@ class Client:
                 first_msg = False
                 sock.settimeout(100)
             except Exception as e:
-                self.logger.error(e)
+                # self.logger.error(e)
+                print(e)
         while True:
             # print(f'{msg.decode()}')
             # write to file, since it is slower than receiving the file
@@ -246,7 +247,8 @@ class Client:
                 # receive the next message
                 msg, addr = sock.recvfrom(buffer_size)
             except timeout:
-                self.logger.error("Timeout")
+                #self.logger.error("Timeout")
+                print(timeout)
 
         sock.settimeout(5.0)
         while True:
