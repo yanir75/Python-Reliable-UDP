@@ -1,5 +1,5 @@
-li = ["test", "test2", "test3"]
-for i in li:
-    print(i)
-    if i == "test2":
-        break
+import time
+a = time.time()
+time.sleep(5)
+b = time.time()
+print(b-a)

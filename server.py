@@ -1,10 +1,11 @@
+import math
 import os
 import time
 from socket import *
 from threading import *
 
 
-# import sched, time
+import sched, time
 
 class Server:
 
@@ -207,6 +208,7 @@ class Server:
         :param port:
         :return:
         """
+        # We used the following to learn on cubic https://www.cs.princeton.edu/courses/archive/fall16/cos561/papers/Cubic08.pdf
         # window size
         window_size = 1
         # time_out
@@ -214,7 +216,8 @@ class Server:
         stream.bind((self.address, port))
         first_msg = True
         #print(port)
-        # s = sched.scheduler(time.time, time.sleep)
+        scheduler = sched.scheduler(time.time, time.sleep)
+
         while True:
             if first_msg is True:
                 # first message is the request to download -99 meaning start sending the file
@@ -223,10 +226,8 @@ class Server:
                     data, addr = stream.recvfrom(1024)
                     if int.from_bytes(data, byteorder='big', signed=True) == -99:
                         first_msg = False
-                        time_out = 1
                         stream.settimeout(time_out) # we start sending the file
-                    # print("test")
-                    # print(curr_download)
+
                 except timeout:
                     print("time____out")
             else:
@@ -239,10 +240,10 @@ class Server:
                     if i == window_size:
                         break
                     i += 1
-                    # s.enter(i/10000, 1,  stream.sendto, (curr_download[key],addr))
-                    stream.sendto(curr_download[key], addr)
+                    scheduler.enter(i/1000000, 1,  stream.sendto, (curr_download[key],addr))
+                    #stream.sendto(curr_download[key], addr)
                 self.lock.release()
-                # s.run()
+                scheduler.run()
                 # index for the number packet we expect to receive from the client
                 j = 0
                 # TODO: modify window size and timeout

@@ -21,7 +21,7 @@ def start():
                        bg='#6faaf8', font=font.Font(size=14, weight='bold', family='courier'))
     # disconnect all button
     # disable the button after click
-    server.disable.append( lambda: disable_button(button))
+    server.disable.append(lambda: disable_button(button))
     # pack the widgets
     button.pack(side=tk.TOP, padx=15, pady=20)
     text_box = tk.Text(window, width=70, height=20, state="disabled")
@@ -61,7 +61,6 @@ def run(server):
 
 def disable_button(button):
     button.config(state="disabled")
-
 
 
 start()
