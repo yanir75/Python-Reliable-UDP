@@ -1,11 +1,14 @@
-import math
+
 import os
-import time
 from socket import *
 from threading import *
-
-
+from congestion_control import CC
 import sched, time
+
+
+def k(Wmax, B, C):
+    return ((Wmax * B) / C) ** (1 / 3)
+
 
 class Server:
 
@@ -174,6 +177,7 @@ class Server:
                 sock.close()
                 # print(self.clients)
                 break
+
     def send_message_to_all(self, message):
         """
         send a message to all the clients
@@ -210,24 +214,23 @@ class Server:
         """
         # We used the following to learn on cubic https://www.cs.princeton.edu/courses/archive/fall16/cos561/papers/Cubic08.pdf
         # window size
-        window_size = 1
         # time_out
         time_out = 1000
         stream.bind((self.address, port))
         first_msg = True
-        #print(port)
+        # print(port)
         scheduler = sched.scheduler(time.time, time.sleep)
 
         while True:
             if first_msg is True:
                 # first message is the request to download -99 meaning start sending the file
                 try:
-                    stream.settimeout(time_out) # to take the time we do not expect many messages here
+                    stream.settimeout(time_out)  # to take the time we do not expect many messages here
                     data, addr = stream.recvfrom(1024)
                     if int.from_bytes(data, byteorder='big', signed=True) == -99:
                         first_msg = False
-                        stream.settimeout(time_out) # we start sending the file
-
+                        stream.settimeout(time_out)  # we start sending the file
+                        congestion_control = CC()
                 except timeout:
                     print("time____out")
             else:
@@ -236,12 +239,14 @@ class Server:
                 # synchronize the stream
                 self.lock.acquire()
                 # send the file through the stream until the window size is reached or we sent the whole file
+                di = {}
                 for key in curr_download.keys():
-                    if i == window_size:
+                    if i == congestion_control.cwnd:
                         break
                     i += 1
-                    scheduler.enter(i/1000000, 1,  stream.sendto, (curr_download[key],addr))
-                    #stream.sendto(curr_download[key], addr)
+                    scheduler.enter(i / 1000, 1, stream.sendto, (curr_download[key], addr))
+                    di[key] = time.time()
+                    # stream.sendto(curr_download[key], addr)
                 self.lock.release()
                 scheduler.run()
                 # index for the number packet we expect to receive from the client
@@ -252,14 +257,18 @@ class Server:
                     stream.settimeout(time_out)
                     try:
                         data, addr = stream.recvfrom(5)
+                        end = time.time()
                         index = int.from_bytes(data, byteorder='big', signed=True)
+                        end = end-di[index]
+                        stream.settimeout(congestion_control.dMin)
+                        congestion_control.ack_recv(end)
                         curr_download.pop(index)
                         j += 1
-                    # timeout error
                     except timeout:
+                        congestion_control.packet_loss()
                         j += 1
-                    # double ack error
                     except KeyError:
+                        congestion_control.double_ack()
                         j += 1
             # verify that the client knows we are done sending the file
             while len(curr_download.keys()) == 0 and not self.streams_send[port % self.num_of_streams]:
@@ -287,7 +296,7 @@ class Server:
         :param packet_size: packet_size to divide the file into packets
         :return:
         """
-        #print("started")
+        # print("started")
         # change the streams to occupied
         for i in range(self.num_of_streams):
             self.streams_send[i] = True
