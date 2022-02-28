@@ -8,7 +8,7 @@ def start():
     server = Server()
     # Create a window
     window = tk.Tk()
-    window.title("Connect window")
+    window.title("Server")
     window['background'] = '#86daeb'
     window.geometry("600x600")
     # get input from user
@@ -16,23 +16,25 @@ def start():
     # create a text box
     # create a button
 
-    button = tk.Button(window, text="Start", command=lambda: Thread(target=server.run).start(), height=7,
+    button = tk.Button(window, text="Start", command=lambda: Thread(target=server.run).start(), width=52, height=3,
                        fg='black',
                        bg='#6faaf8', font=font.Font(size=14, weight='bold', family='courier'))
     # disconnect all button
     # disable the button after click
     server.disable.append(lambda: disable_button(button))
     # pack the widgets
-    button.pack(side=tk.TOP, padx=15, pady=20)
+    # button.pack(side=tk.TOP, padx=15, pady=20)
+    button.place(x=5, y=50)
     text_box = tk.Text(window, width=70, height=20, state="disabled")
     text_box.pack(side=tk.LEFT, padx=15, pady=20)
     scrollbar = tk.Scrollbar(window, command=text_box.yview)
-    scrollbar.place(x=570, y=242, height=325)
+    scrollbar.place(x=580, y=140, height=325)
     server.funcs.append(lambda msg: update_chat(text_box, msg))
 
     # add disconnect button
-    dis_button = tk.Button(window, text="Disconnect", command=lambda: server.disconnect_all())
-    dis_button.place(x=20, y=20)
+    dis_button = tk.Button(window, text="Disconnect", command=lambda: server.disconnect_all(),fg='black',
+                       bg='#6faaf8', font=font.Font(size=14, weight='bold', family='courier'))
+    dis_button.place(x=20, y=10, width=550)
     # on exit, disconnect all
     window.protocol("WM_DELETE_WINDOW", lambda: server.disconnect_all())
     # start the main loop

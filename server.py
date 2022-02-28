@@ -77,6 +77,7 @@ class Server:
             self.send_message_to_all("A new member has entered the chat: " + name)
             for func in self.funcs:
                 func("A new member has entered the chat: " + name)
+            self.send_message_to_all(f'{name} is online')
             self.send_client(sock, "<connected>")
             self.clients[sock] = name
             # create a thread to handle the client
@@ -105,6 +106,7 @@ class Server:
                     # disconnect the client
                     if message == "<disconnect>":
                         self.send_client(sock, "<disconnected>")
+                        self.send_message_to_all(f'{name} is offline')
                         raise Exception("A client has disconnected")
                     # Send the users to the client
                     elif message == "<get_users>":
@@ -120,11 +122,11 @@ class Server:
                         msg = mess[3][:-1]
                         for client in self.clients.keys():
                             if self.clients[client] == to:
-                                self.send_client(client, f'<{name}:{msg}>')
+                                self.send_client(client, f'<{name}(private): {msg}>')
                     # send a public message
                     elif message.startswith("<set_msg_all>"):
                         #    print(message[14:-1])
-                        self.send_message_to_all(f'<{name}:{message[14:-1]}>')
+                        self.send_message_to_all(f'<{name}: {message[14:-1]}>')
                     # send file list, (all the files in the folder named files)
                     elif message == "<get_list_file>":
                         file_list = os.listdir('./files')

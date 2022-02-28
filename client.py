@@ -160,6 +160,9 @@ class Client:
         while len(self.file_dict) != 0:
             # print(self.file_dict)
             self.write_to_file()
+            if len(self.file_dict) == 1:
+                for func in self.funcs:
+                    func(f'last byte received is {self.file_dict[self.ind][-1]}')
         self.ind = 1
         self.file.close()
         self.file = None
