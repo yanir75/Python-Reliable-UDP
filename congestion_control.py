@@ -20,9 +20,9 @@ class CC:
 
     def ack_recv(self, RTT):
         if self.dMin:
-            self.dMin = min(self.dMin, RTT*4)
+            self.dMin = min(self.dMin, RTT * 4)
         else:
-            self.dMin = RTT*4
+            self.dMin = RTT * 4
         if self.cwnd <= self.ssThresh:
             self.cwnd += 1
         else:
@@ -75,9 +75,10 @@ class CC:
             if cnt > max_cnt:
                 cnt = max_cnt
         return cnt
+
     def double_ack(self):
         self.wLast_max = self.cwnd
-        self.ssThresh = max(2,self.cwnd*self.B)
+        self.ssThresh = max(2, int(self.cwnd * self.B))
         self.cwnd = self.cwnd * (1 - self.B)
 
     def cubic_reset(self):
