@@ -52,7 +52,7 @@ class Server:
         self.socket.listen(5)
         # create a list of clients to store the clients connected to the server
         self.clients = {}
-        self.window_size = 5
+        self.window_size = 5 #
 
     def run(self, packet_size=1024):
         """
