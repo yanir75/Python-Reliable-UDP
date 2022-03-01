@@ -25,10 +25,10 @@ def start():
     # pack the widgets
     # button.pack(side=tk.TOP, padx=15, pady=20)
     button.place(x=5, y=50)
-    text_box = tk.Text(window, width=70, height=20, state="disabled")
-    text_box.pack(side=tk.LEFT, padx=15, pady=20)
+    text_box = tk.Text(window, width=70, height=27, state="disabled")
+    text_box.place(x=5, y=150)
     scrollbar = tk.Scrollbar(window, command=text_box.yview)
-    scrollbar.place(x=580, y=140, height=325)
+    scrollbar.place(x=575, y=148, height=440)
     server.funcs.append(lambda msg: update_chat(text_box, msg))
 
     # add disconnect button

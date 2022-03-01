@@ -53,6 +53,7 @@ class Client:
         # amount of download streams
         self.download_streams = download_streams
         self.udp_port = udp_port
+        self.last_byte = 0
 
     def connect(self, name, host='127.0.0.1', port=50000):
         """
@@ -160,9 +161,8 @@ class Client:
         while len(self.file_dict) != 0:
             # print(self.file_dict)
             self.write_to_file()
-            if len(self.file_dict) == 1:
-                for func in self.funcs:
-                    func(f'last byte received is {self.file_dict[self.ind][-1]}')
+        for func in self.funcs:
+            func(f'last byte received is {self.last_byte[-1]}')
         self.ind = 1
         self.file.close()
         self.file = None
@@ -223,7 +223,7 @@ class Client:
                 sock.settimeout(100)
             except Exception as e:
                 # self.logger.error(e)
-                print(e)
+                print("first try")
         while True:
             # print(f'{msg.decode()}')
             # write to file, since it is slower than receiving the file
@@ -252,7 +252,7 @@ class Client:
                 msg, addr = sock.recvfrom(buffer_size)
             except timeout:
                 #self.logger.error("Timeout")
-                print(timeout)
+                print("second timeout")
 
         sock.settimeout(5.0)
         while True:
@@ -271,5 +271,5 @@ class Client:
         # print("writing to file")
         # print(self.file_dict[self.ind])
         self.file.write(self.file_dict[self.ind])
-        self.file_dict.pop(self.ind)
+        self.last_byte = self.file_dict.pop(self.ind)
         self.ind += 1

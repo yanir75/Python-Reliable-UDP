@@ -217,7 +217,6 @@ class Server:
         # We used the following to learn on cubic https://www.cs.princeton.edu/courses/archive/fall16/cos561/papers/Cubic08.pdf
         # window size
         # time_out
-        time_out = 1000
         stream.bind((self.address, port))
         first_msg = True
         # print(port)
@@ -227,14 +226,16 @@ class Server:
             if first_msg is True:
                 # first message is the request to download -99 meaning start sending the file
                 try:
-                    stream.settimeout(time_out)  # to take the time we do not expect many messages here
+                    stream.settimeout(100)  # to take the time we do not expect many messages here
                     data, addr = stream.recvfrom(1024)
                     if int.from_bytes(data, byteorder='big', signed=True) == -99:
                         first_msg = False
-                        stream.settimeout(time_out)  # we start sending the file
+                        stream.settimeout(1)  # we start sending the file
                         congestion_control = CC()
                 except timeout:
                     print("time____out")
+                except BlockingIOError as b:
+                    pass
             else:
                 # index for the number of packets we sent to the client
                 i = 0
@@ -246,7 +247,7 @@ class Server:
                     if i == congestion_control.cwnd:
                         break
                     i += 1
-                    scheduler.enter(i/congestion_control.cwnd/1000, 1, stream.sendto, (curr_download[key], addr))
+                    scheduler.enter(i/congestion_control.cwnd/1000, 1, stream.sendto, (curr_download[key], addr)) #
                     di[key] = time.time()
                     # stream.sendto(curr_download[key], addr)
                 self.lock.release()
@@ -256,12 +257,12 @@ class Server:
                 # TODO: modify window size and timeout
                 # we expect to receive j ACKS from the client
                 while j < i:
-                    stream.settimeout(time_out)
                     try:
                         data, addr = stream.recvfrom(5)
                         end = time.time()
                         index = int.from_bytes(data, byteorder='big', signed=True)
                         end = end-di[index]
+
                         stream.settimeout(congestion_control.dMin)
                         congestion_control.ack_recv(end)
                         curr_download.pop(index)
@@ -272,13 +273,15 @@ class Server:
                     except KeyError:
                         congestion_control.double_ack()
                         j += 1
+                    except BlockingIOError as b:
+                        pass
             # verify that the client knows we are done sending the file
             while len(curr_download.keys()) == 0 and not self.streams_send[port % self.num_of_streams]:
                 first_msg = True
                 try:
                     # we expect to receive a message from the client within the same time_out
                     # -100 means we are done sending the file
-                    stream.settimeout(time_out)
+                    stream.settimeout(3)
                     fin = -100
                     stream.sendto(fin.to_bytes(5, byteorder="big", signed=True), addr)
                     data, addr = stream.recvfrom(1024)
@@ -288,6 +291,8 @@ class Server:
                     self.available[port % self.num_of_streams] = True
                 except timeout:
                     print("timeout")
+                except BlockingIOError as b:
+                    pass
 
     def write_to_dict(self, file, close_file, file_name, packet_size=507):
         """
