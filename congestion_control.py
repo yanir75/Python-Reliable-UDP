@@ -17,8 +17,13 @@ class CC:
         self.C = 0.4
         self.ssThresh = 100
         self.cwndcount = 0
+        self.continuos_ack = 0
 
     def ack_recv(self, RTT):
+        self.continuos_ack += 1
+        if self.continuos_ack == self.ssThresh/2:
+            self.ssThresh+= self.continuos_ack
+            self.continuos_ack = 0
         if self.dMin:
             self.dMin = min(self.dMin, RTT * 4)
         else:
@@ -34,6 +39,7 @@ class CC:
                 self.cwndcount += 1
 
     def packet_loss(self):
+        self.continuos_ack = 0
         self.epoch_start = 0
         if self.cwnd < self.wLast_max and self.fast_convergence:
             self.wLast_max = self.cwnd * (2 - self.B) / 2
@@ -80,6 +86,7 @@ class CC:
         self.wLast_max = self.cwnd
         self.ssThresh = max(2, int(self.cwnd * self.B))
         self.cwnd = self.cwnd * (1 - self.B)
+        self.dMin = self.dMin * 3
 
     def cubic_reset(self):
         self.wLast_max = 0
