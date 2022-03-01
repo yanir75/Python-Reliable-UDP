@@ -251,7 +251,7 @@ class Client:
                 # receive the next message
                 msg, addr = sock.recvfrom(buffer_size)
             except timeout:
-                #self.logger.error("Timeout")
+                # self.logger.error("Timeout")
                 print(timeout)
 
         sock.settimeout(5.0)
@@ -262,6 +262,7 @@ class Client:
                 sock.recvfrom(buffer_size)
             except timeout:
                 break
+        sock.close()
 
     def write_to_file(self):
         """

@@ -1,13 +1,8 @@
-
 import os
 from socket import *
 from threading import *
 from congestion_control import CC
 import sched, time
-
-
-def k(Wmax, B, C):
-    return ((Wmax * B) / C) ** (1 / 3)
 
 
 class Server:
@@ -23,6 +18,7 @@ class Server:
         self.disable = []
         # AF_inet = IPv4 address family and SOCK_STREAM = TCP
         self.socket = socket(AF_INET, SOCK_STREAM)
+        self.socket.setblocking(True)
         # UDP streams (sockets) list
         self.streams = []
         # UDP availability to download list
@@ -227,11 +223,11 @@ class Server:
             if first_msg is True:
                 # first message is the request to download -99 meaning start sending the file
                 try:
-                    stream.settimeout(time_out)  # to take the time we do not expect many messages here
+                    stream.settimeout(10)  # to take the time we do not expect many messages here
                     data, addr = stream.recvfrom(1024)
                     if int.from_bytes(data, byteorder='big', signed=True) == -99:
                         first_msg = False
-                        stream.settimeout(time_out)  # we start sending the file
+                        stream.settimeout(1)  # we start sending the file
                         congestion_control = CC()
                 except timeout:
                     print("time____out")
@@ -246,7 +242,7 @@ class Server:
                     if i == congestion_control.cwnd:
                         break
                     i += 1
-                    scheduler.enter(i/congestion_control.cwnd/1000, 1, stream.sendto, (curr_download[key], addr))
+                    scheduler.enter(i / congestion_control.cwnd / 1000, 1, stream.sendto, (curr_download[key], addr))
                     di[key] = time.time()
                     # stream.sendto(curr_download[key], addr)
                 self.lock.release()
@@ -256,18 +252,20 @@ class Server:
                 # TODO: modify window size and timeout
                 # we expect to receive j ACKS from the client
                 while j < i:
-                    stream.settimeout(time_out)
                     try:
+                        self.lock.acquire()
                         data, addr = stream.recvfrom(5)
+                        self.lock.release()
                         end = time.time()
                         index = int.from_bytes(data, byteorder='big', signed=True)
-                        end = end-di[index]
+                        end = end - di[index]
                         stream.settimeout(congestion_control.dMin)
                         congestion_control.ack_recv(end)
                         curr_download.pop(index)
                         j += 1
                     except timeout:
                         congestion_control.packet_loss()
+                        self.lock.release()
                         j += 1
                     except KeyError:
                         congestion_control.double_ack()
@@ -278,7 +276,7 @@ class Server:
                 try:
                     # we expect to receive a message from the client within the same time_out
                     # -100 means we are done sending the file
-                    stream.settimeout(time_out)
+                    stream.settimeout(3)
                     fin = -100
                     stream.sendto(fin.to_bytes(5, byteorder="big", signed=True), addr)
                     data, addr = stream.recvfrom(1024)
