@@ -54,6 +54,8 @@ class Client:
         self.download_streams = download_streams
         self.udp_port = udp_port
         self.last_byte = 0
+        # for tests
+        self.last_msg = None
 
     def connect(self, name, host='127.0.0.1', port=50000):
         """
@@ -140,7 +142,7 @@ class Client:
         for func in self.deactivate:
             func()
         # open the file for binary reading
-        self.file = open(file_name, 'ab')
+        self.file = open('./download/' + file_name, 'ab')
         # if self.DEBUG:
         #     self.logger.info(f'file opened for writing {file_name}')
         # self.threads.append(Thread(target=self.recv_and_send, args=(50010, 0)))
@@ -189,7 +191,7 @@ class Client:
         while self.running:
             # Receive the message from the server
             message = self.socket.recv(1024).decode()
-            print(message)
+            self.last_msg = message
             # if self.DEBUG:
             #     self.logger.info(f'received {message}')
             # print(message)
@@ -223,7 +225,8 @@ class Client:
                 sock.settimeout(100)
             except Exception as e:
                 # self.logger.error(e)
-                print("first try")
+                # print("first try")
+                pass
         while True:
             # print(f'{msg.decode()}')
             # write to file, since it is slower than receiving the file
@@ -251,8 +254,9 @@ class Client:
                 # receive the next message
                 msg, addr = sock.recvfrom(buffer_size)
             except timeout:
-                #self.logger.error("Timeout")
-                print("second timeout")
+                # self.logger.error("Timeout")
+                # print("second timeout")
+                pass
 
         sock.settimeout(5.0)
         while True:

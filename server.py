@@ -52,7 +52,10 @@ class Server:
         self.socket.listen(5)
         # create a list of clients to store the clients connected to the server
         self.clients = {}
-        self.window_size = 5 #
+        self.window_size = 5
+        self.server_is_active = True
+        # for tests
+        self.last_msg = None
 
     def run(self, packet_size=1024):
         """
@@ -66,22 +69,25 @@ class Server:
         for i in range(self.num_of_streams):
             Thread(target=self.send_file_udp,
                    args=(self.streams[i], self.streams_download[i], self.udp_port + i)).start()
-        while True:
+        while self.server_is_active:
             # accept a connection from a client
-            sock, addr = self.socket.accept()
-            # receive the name of the client
-            name = sock.recv(packet_size).decode()
-            name = name[10:-5]
-            # print(name)
-            # add the client to the list of clients
-            self.send_message_to_all("A new member has entered the chat: " + name)
-            for func in self.funcs:
-                func("A new member has entered the chat: " + name)
-            self.send_message_to_all(f'{name} is online')
-            self.send_client(sock, "<connected>")
-            self.clients[sock] = name
-            # create a thread to handle the client
-            Thread(target=self.handle_client, args=(sock, name)).start()
+            try:
+                sock, addr = self.socket.accept()
+                # receive the name of the client
+                name = sock.recv(packet_size).decode()
+                name = name[10:-5]
+                # print(name)
+                # add the client to the list of clients
+                self.send_message_to_all("A new member has entered the chat: " + name)
+                for func in self.funcs:
+                    func("A new member has entered the chat: " + name)
+                self.send_message_to_all(f'{name} is online')
+                self.send_client(sock, "<connected>")
+                self.clients[sock] = name
+                # create a thread to handle the client
+                Thread(target=self.handle_client, args=(sock, name)).start()
+            except:
+                pass
 
     def handle_client(self, sock, name, packet_size=1024):
         """
@@ -91,7 +97,7 @@ class Server:
         :param packet_size: Size of the receiving packet
         :return:
         """
-        while True:
+        while self.server_is_active:
             try:
                 # receive the message from the client
                 messages = sock.recv(packet_size).decode()
@@ -99,7 +105,7 @@ class Server:
                 # print(msgs)
                 # handle the message
                 for message in msgs[:-1]:
-                    print(message)
+                    self.last_msg = message
                     for func in self.funcs:
                         func(f'{name}: {message}')
                     #    print(message)
@@ -140,7 +146,7 @@ class Server:
                         file_name = message[11:-1]
                         # check if the file exists
                         if not os.path.exists('./files/' + file_name):
-                            self.send_client(sock, "<file_not_found>")
+                            self.send_client(sock, "<file not found>")
                         # check availability of the socket
                         else:
                             boolen = True
@@ -222,7 +228,7 @@ class Server:
         # print(port)
         scheduler = sched.scheduler(time.time, time.sleep)
 
-        while True:
+        while self.server_is_active:
             if first_msg is True:
                 # first message is the request to download -99 meaning start sending the file
                 try:
@@ -247,7 +253,7 @@ class Server:
                     if i == congestion_control.cwnd:
                         break
                     i += 1
-                    scheduler.enter(i/congestion_control.cwnd/1000, 1, stream.sendto, (curr_download[key], addr)) #
+                    scheduler.enter(i/congestion_control.cwnd/100000, 1, stream.sendto, (curr_download[key], addr)) #
                     di[key] = time.time()
                     # stream.sendto(curr_download[key], addr)
                 self.lock.release()
@@ -338,5 +344,7 @@ class Server:
 
     def disconnect_all(self):
         self.send_message_to_all("<disconnected>")
+        self.server_is_active = False
         self.socket.close()
-        os._exit(0)
+        if len(self.funcs) > 0:
+            os._exit(0)
