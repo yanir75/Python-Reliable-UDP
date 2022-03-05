@@ -17,6 +17,6 @@ class TestFileList(unittest.TestCase):
         time.sleep(0.2)
         self.assertEqual('<get_list_file>', ser.last_msg)
         time.sleep(0.2)
-        self.assertEqual('<---file_lst---><3><Elevator.png><no_shit.txt><test.txt><---end--->', cl.last_msg)
+        self.assertEqual('<---file_lst---><2><Elevator.png><test.txt><---end--->', cl.last_msg)
         time.sleep(0.2)
         ser.disconnect_all()

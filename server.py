@@ -348,5 +348,7 @@ class Server:
         self.send_message_to_all("<disconnected>")
         self.server_is_active = False
         self.socket.close()
+        for sock in self.streams:
+            sock.close()
         if len(self.funcs) > 0:
             os._exit(0)
