@@ -3,7 +3,8 @@ import os
 from socket import *
 from threading import *
 from congestion_control import CC
-import sched, time
+#import sched, time
+import time
 
 
 def k(Wmax, B, C):
@@ -226,7 +227,7 @@ class Server:
         stream.bind((self.address, port))
         first_msg = True
         # print(port)
-        scheduler = sched.scheduler(time.time, time.sleep)
+        #scheduler = sched.scheduler(time.time, time.sleep)
 
         while self.server_is_active:
             if first_msg is True:
@@ -253,11 +254,12 @@ class Server:
                     if i == congestion_control.cwnd:
                         break
                     i += 1
-                    scheduler.enter(i/congestion_control.cwnd/10000000, 1, stream.sendto, (curr_download[key], addr)) #
+                    #scheduler.enter(i/congestion_control.cwnd/10000000, 1, stream.sendto, (curr_download[key], addr)) #
+                    stream.sendto(curr_download[key], addr)
                     di[key] = time.time()
                     # stream.sendto(curr_download[key], addr)
                 self.lock.release()
-                scheduler.run()
+                #scheduler.run()
                 # index for the number packet we expect to receive from the client
                 j = 0
                 # TODO: modify window size and timeout
