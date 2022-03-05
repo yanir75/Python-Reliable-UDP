@@ -5,7 +5,8 @@ import time
 import filecmp
 from threading import *
 
-class testSystem(unittest.TestCase):
+
+class TestDownload(unittest.TestCase):
     def test_file_download(self):
         cl = Client()
         ser = Server()
@@ -20,11 +21,6 @@ class testSystem(unittest.TestCase):
         cl.download("test.txt")
         time.sleep(8)
         self.assertTrue(filecmp.cmp('test.txt', './files/test.txt'))
-        cl.download("no_shit.txt")
-        time.sleep(8)
-        cl.download("no_shit.txt")
-        time.sleep(8)
-        self.assertTrue(filecmp.cmp('no_shit.txt', './files/no_shit.txt'))
         cl.download("elevator.png")
         time.sleep(8)
         cl.download("elevator.png")
@@ -32,6 +28,8 @@ class testSystem(unittest.TestCase):
         self.assertTrue(filecmp.cmp('elevator.png', 'elevator.png'))
         ser.disconnect_all()
 
+
+class TestMsgs(unittest.TestCase):
     def test_msgs_client_server(self):
         cl = Client()
         ser = Server()
@@ -60,6 +58,8 @@ class testSystem(unittest.TestCase):
         time.sleep(0.2)
         ser.disconnect_all()
 
+
+class TestFileList(unittest.TestCase):
     def test_file_list(self):
         cl = Client()
         ser = Server()
@@ -76,6 +76,8 @@ class testSystem(unittest.TestCase):
         time.sleep(0.2)
         ser.disconnect_all()
 
+
+class TestGetUsers(unittest.TestCase):
     def test_get_users(self):
         cl = Client()
         ser = Server()
@@ -92,6 +94,8 @@ class testSystem(unittest.TestCase):
         time.sleep(0.2)
         ser.disconnect_all()
 
+
+class TestMsgsBetweenUsers(unittest.TestCase):
     def test_msgs_between_users(self):
         cl = Client()
         cl2 = Client()
