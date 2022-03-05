@@ -123,3 +123,4 @@ class TestMsgsBetweenUsers(unittest.TestCase):
         self.assertEqual('<last one: hello all>', cl.last_msg)
         self.assertEqual('<last one: hello all>', cl3.last_msg)
         ser.disconnect_all()
+
