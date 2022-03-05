@@ -253,7 +253,7 @@ class Server:
                     if i == congestion_control.cwnd:
                         break
                     i += 1
-                    scheduler.enter(i/congestion_control.cwnd/100000, 1, stream.sendto, (curr_download[key], addr)) #
+                    scheduler.enter(i/congestion_control.cwnd/10000000, 1, stream.sendto, (curr_download[key], addr)) #
                     di[key] = time.time()
                     # stream.sendto(curr_download[key], addr)
                 self.lock.release()
