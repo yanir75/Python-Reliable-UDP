@@ -116,6 +116,8 @@ class Client:
         # if delete count = 2 you are downloading the second half of the file
         # if delete count = 3 you finished and requested another file
         # however if delete count = 2 and you requested a new file we will delete the previous one
+
+        # cannot download the same file twice immediately, if the files exists it will not download correctly
         if not self.downloading:
             self.delete_count += 1
             if self.file_name != file_name and self.delete_count == 3:
@@ -132,7 +134,7 @@ class Client:
         else:
             # self.logger.warning('Already downloading a file')
             for func in self.funcs:
-                func("<You are in a middle wait you piece of shit>")
+                func("<Already downloading>")
 
     def download_file(self, file_name):
         self.downloading = True
