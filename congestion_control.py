@@ -48,9 +48,6 @@ class CC:
             self.ssThresh = self.cwnd
             self.cwnd = self.cwnd * (1 - self.B)
 
-    def timeout(self):
-        self.cubic_reset()
-
     def cubic_update(self):
         self.ack_count += 1
         if self.epoch_start <= 0:
@@ -63,7 +60,7 @@ class CC:
                 self.origin_point = self.cwnd
             self.ack_count = 1
             self.w_TCP = self.cwnd
-        t = self.dMin + time.time() - self.epoch_start
+        t = self.dMin/4 + time.time() - self.epoch_start
         target = self.origin_point + self.C * ((t - self.K) ** 3)
         if target > self.cwnd:
             cnt = self.cwnd / (target - self.cwnd)
@@ -87,12 +84,3 @@ class CC:
         self.ssThresh = max(2, int(self.cwnd * self.B))
         self.cwnd = self.cwnd * (1 - self.B)
         self.dMin = self.dMin * 3
-
-    def cubic_reset(self):
-        self.wLast_max = 0
-        self.epoch_start = 0
-        self.origin_point = 0
-        self.dMin = 0
-        self.w_TCP = 0
-        self.K = 0
-        self.ack_count = 0

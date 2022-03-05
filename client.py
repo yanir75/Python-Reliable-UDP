@@ -142,7 +142,7 @@ class Client:
         for func in self.deactivate:
             func()
         # open the file for binary reading
-        self.file = open('./download/' + file_name, 'ab')
+        self.file = open(file_name, 'ab')
         # if self.DEBUG:
         #     self.logger.info(f'file opened for writing {file_name}')
         # self.threads.append(Thread(target=self.recv_and_send, args=(50010, 0)))
