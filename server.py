@@ -7,10 +7,6 @@ from congestion_control import CC
 import time
 
 
-def k(Wmax, B, C):
-    return ((Wmax * B) / C) ** (1 / 3)
-
-
 class Server:
 
     def __init__(self, address="127.0.0.1", tcp_port=50000, udp_port=50010, num_of_streams=2):
