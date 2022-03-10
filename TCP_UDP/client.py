@@ -1,7 +1,7 @@
 import os
 from socket import *
 from threading import *
-import logging
+#import logging
 
 
 class Client:
