@@ -1,6 +1,6 @@
 import unittest
-from server import Server
-from client import Client
+from TCP_UDP.server import Server
+from TCP_UDP.client import Client
 import time
 import filecmp
 from threading import *
@@ -20,7 +20,7 @@ class TestDownload(unittest.TestCase):
         time.sleep(8)
         cl.download("test.txt")
         time.sleep(8)
-        self.assertTrue(filecmp.cmp('test.txt', './files/test.txt'))
+        self.assertTrue(filecmp.cmp('test.txt', '../files/test.txt'))
         cl.download("elevator.png")
         time.sleep(8)
         cl.download("elevator.png")

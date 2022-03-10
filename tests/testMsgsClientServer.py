@@ -1,6 +1,6 @@
 import unittest
-from server import Server
-from client import Client
+from TCP_UDP.server import Server
+from TCP_UDP.client import Client
 import time
 from threading import *
 

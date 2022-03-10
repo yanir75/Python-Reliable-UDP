@@ -1,11 +1,11 @@
 import unittest
-from server import Server
-from client import Client
+from TCP_UDP.server import Server
+from TCP_UDP.client import Client
 import time
 from threading import *
 
-class TestFileList(unittest.TestCase):
-    def test_file_list(self):
+class TestGetUsers(unittest.TestCase):
+    def test_get_users(self):
         cl = Client()
         ser = Server()
         t1 = Thread(target=ser.run)
@@ -13,10 +13,10 @@ class TestFileList(unittest.TestCase):
         t1.start()
         time.sleep(0.2)
         cl.connect("test")
-        cl.get_list_file()
+        cl.get_users()
         time.sleep(0.2)
-        self.assertEqual('<get_list_file>', ser.last_msg)
+        self.assertEqual('<get_users>', ser.last_msg)
         time.sleep(0.2)
-        self.assertEqual('<---file_lst---><2><Elevator.png><test.txt><---end--->', cl.last_msg)
+        self.assertEqual('<---users_lst---><1><test><---end--->', cl.last_msg)
         time.sleep(0.2)
         ser.disconnect_all()

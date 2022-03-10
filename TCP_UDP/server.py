@@ -2,7 +2,7 @@
 import os
 from socket import *
 from threading import *
-from congestion_control import CC
+from TCP_UDP.congestion_control import CC
 #import sched, time
 import time
 
@@ -132,7 +132,7 @@ class Server:
                         self.send_message_to_all(f'<{name}: {message[14:-1]}>')
                     # send file list, (all the files in the folder named files)
                     elif message == "<get_list_file>":
-                        file_list = os.listdir('./files')
+                        file_list = os.listdir('../files')
                         msg = f'<---file_lst---><{len(file_list)}>'
                         for file in file_list:
                             msg += f'<{file}>'
@@ -142,7 +142,7 @@ class Server:
                     elif message.startswith("<download>"):
                         file_name = message[11:-1]
                         # check if the file exists
-                        if not os.path.exists('./files/' + file_name):
+                        if not os.path.exists('../files/' + file_name):
                             self.send_client(sock, "<file not found>")
                         # check availability of the socket
                         else:
@@ -160,13 +160,13 @@ class Server:
                                 # this will forget the previous file and close it
                                 # this will activate a thread to write the file into a private streams dictionary
                                 if name not in self.download_queue.keys():
-                                    file = open('./files/' + file_name, 'rb')
+                                    file = open('../files/' + file_name, 'rb')
                                     self.download_queue[name] = (file, file_name)
                                     Thread(target=self.write_to_dict, args=(file, False, file_name)).start()
                                 elif file_name != self.download_queue[name][1]:
                                     file = self.download_queue[name][0]
                                     file.close()
-                                    file = open('./files/' + file_name, 'rb')
+                                    file = open('../files/' + file_name, 'rb')
                                     self.download_queue[name] = (file, file_name)
                                     Thread(target=self.write_to_dict, args=(file, False, file_name)).start()
                                 else:
@@ -312,7 +312,7 @@ class Server:
         for i in range(self.num_of_streams):
             self.streams_send[i] = True
         # get the file size
-        num_of_packets = os.path.getsize('./files/' + file_name)
+        num_of_packets = os.path.getsize('../files/' + file_name)
         # stop at the middle of the file / end if it is the second time
         num_of_packets = num_of_packets / (packet_size * 2) + 1
         byte = file.read(packet_size)
