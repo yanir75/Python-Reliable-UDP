@@ -8,7 +8,8 @@ The chat was implemented in TCP,File downloading however was implemented in UDP.
 Chat was implemented through sending TCP messages to the server, the server will transfer the message to whomever needed.  
 A convention of messages was implemented to our GUIs. Thus the server can seperate and operate on each message.  
 We decided to implement few UDP streams (can be decided on creating the objects). Which will transfer the file simultaneously to the client.  
-The client will receive the file and reconstruct it on his side.
+The client will receive the file and reconstruct it on his side.  
+In this implementation we tried to simulate Quic over regular communication.
 
 
 --------------
