@@ -1,0 +1,95 @@
+@startuml
+class Client {
+    activate
+    deactivate
+    delete_count
+    download_streams
+    downloading
+    file
+    file_dict
+    file_name
+    funcs
+    ind
+    last_byte
+    last_msg
+    lock
+    running
+    socket
+    udp_port
+    __init__()
+    connect()
+    disconnect()
+    download()
+    download_file()
+    get_list_file()
+    get_msg()
+    get_users()
+    recv_and_send()
+    set_msg()
+    write_to_file()
+}
+
+class client_py <<module>> << (M,orchid) >> #DarkSeaGreen {
+}
+
+client_py .. Client : contains >
+class CC {
+    B
+    C
+    K
+    ack_count
+    continuos_ack
+    cwnd
+    cwndcount
+    dMin
+    epoch_start
+    fast_convergence
+    origin_point
+    ssThresh
+    tcp_friendliness
+    wLast_max
+    w_TCP
+    __init__()
+    ack_recv()
+    cubic_tcp_friendliness()
+    cubic_update()
+    double_ack()
+    packet_loss()
+}
+
+
+
+class Server {
+    address
+    available
+    clients
+    disable
+    download_queue
+    funcs
+    last_msg
+    lock
+    num_of_streams
+    server_is_active
+    socket
+    streams
+    streams_download
+    streams_send
+    udp_port
+    window_size
+    __init__()
+    disconnect_all()
+    handle_client()
+    run()
+    send_client()
+    send_file_udp()
+    send_message_to_all()
+    write_to_dict()
+}
+
+class server_py <<module>> << (M,orchid) >> #DarkSeaGreen {
+}
+
+Server .. CC : uses >
+server_py .. Server : contains >
+server_py .. CC : contains >
+@enduml
