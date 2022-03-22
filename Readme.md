@@ -30,7 +30,7 @@ Run the server gui
 ```
 python server_gui.py
 ```
-Activate the server then you can activate up to 5 clients.
+Activate the server then you can activate up to 5 clients.  
 Run the client
 ```
 python client_gui.py
