@@ -26,10 +26,17 @@ Clone the repository
 ```
 git clone https://github.com/yanir75/Python-TCP-Over-UDP.git && cd Python-TCP-Over-UDP/TCP_UDP
 ```
+
+In case you don't have tkinter module
+```
+sudo apt-get install python3-tk
+```
+
 Run the server gui
 ```
 python server_gui.py
 ```
+
 Activate the server then you can activate up to 5 clients.  
 Run the client
 ```
