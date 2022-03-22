@@ -40,3 +40,4 @@ python client_gui.py
 --------------
 # Sources
   - <a href="https://www.cs.princeton.edu/courses/archive/fall16/cos561/papers/Cubic08.pdf">Princeton cubic research</a>
+  - <a href="https://en.wikipedia.org/wiki/QUIC">QUIC information</a>
