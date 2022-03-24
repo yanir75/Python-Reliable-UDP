@@ -2,7 +2,7 @@
 import os
 from socket import *
 from threading import *
-from TCP_UDP.congestion_control import CC
+from Reliable_UDP.congestion_control import CC
 #import sched, time
 import time
 
