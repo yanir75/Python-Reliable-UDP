@@ -24,7 +24,7 @@ Classes we used to implement the project.
 # How to use
 Clone the repository
 ```
-git clone https://github.com/yanir75/Python-TCP-Over-UDP.git && cd Python-TCP-Over-UDP/TCP_UDP
+git clone https://github.com/yanir75/Python-Reliable-UDP.git && cd Python-Reliable-UDP/Reliable_UDP
 ```
 
 In case you don't have tkinter module
