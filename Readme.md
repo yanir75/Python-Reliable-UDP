@@ -1,4 +1,4 @@
-# Python tcp over udp
+# Python Reliable udp
 In this project we created a chat with the option to download a file.  
 The chat was implemented in TCP,File downloading however was implemented in UDP. But we had to make it reliable, we wouldn't want to miss part of the file. 
 
